@@ -1,0 +1,401 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>M3U Generator</title>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #0a0a0f;
+    --surface: #13131a;
+    --surface2: #1c1c28;
+    --accent: #7c5cfc;
+    --accent2: #fc5c7d;
+    --text: #e8e8f0;
+    --muted: #6b6b80;
+    --border: #2a2a38;
+    --success: #4ecca3;
+  }
+
+  body {
+    font-family: 'Cairo', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 24px 16px;
+    overflow-x: hidden;
+  }
+
+  /* Background */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background:
+      radial-gradient(ellipse 60% 50% at 20% 20%, rgba(124,92,252,0.12) 0%, transparent 60%),
+      radial-gradient(ellipse 50% 40% at 80% 80%, rgba(252,92,125,0.08) 0%, transparent 60%);
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .container {
+    position: relative;
+    z-index: 1;
+    width: 100%;
+    max-width: 560px;
+  }
+
+  /* Header */
+  .header {
+    text-align: center;
+    margin-bottom: 36px;
+    animation: fadeDown 0.6s ease both;
+  }
+
+  .logo {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 10px;
+  }
+
+  .logo-icon {
+    width: 44px;
+    height: 44px;
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 22px;
+  }
+
+  h1 {
+    font-size: 28px;
+    font-weight: 900;
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    letter-spacing: -0.5px;
+  }
+
+  .subtitle {
+    color: var(--muted);
+    font-size: 14px;
+    margin-top: 4px;
+  }
+
+  /* Card */
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 28px;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    animation: fadeUp 0.6s ease 0.1s both;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.4);
+  }
+
+  .field {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  label {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--muted);
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  label span.dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    display: inline-block;
+  }
+
+  textarea {
+    width: 100%;
+    min-height: 140px;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    color: var(--text);
+    font-family: 'Cairo', monospace;
+    font-size: 13px;
+    padding: 14px;
+    resize: vertical;
+    outline: none;
+    transition: border-color 0.2s, box-shadow 0.2s;
+    line-height: 1.7;
+    direction: ltr;
+  }
+
+  textarea::placeholder { color: var(--muted); opacity: 0.6; }
+
+  textarea:focus {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px rgba(124,92,252,0.15);
+  }
+
+  .row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+  }
+
+  input[type="number"],
+  input[type="text"] {
+    width: 100%;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    color: var(--text);
+    font-family: 'Cairo', sans-serif;
+    font-size: 15px;
+    font-weight: 600;
+    padding: 13px 16px;
+    outline: none;
+    transition: border-color 0.2s, box-shadow 0.2s;
+    text-align: center;
+  }
+
+  input::placeholder { color: var(--muted); opacity: 0.6; font-weight: 400; }
+
+  input:focus {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px rgba(124,92,252,0.15);
+  }
+
+  /* Button */
+  .btn {
+    width: 100%;
+    padding: 15px;
+    border: none;
+    border-radius: 12px;
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    color: #fff;
+    font-family: 'Cairo', sans-serif;
+    font-size: 16px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: transform 0.15s, box-shadow 0.15s, opacity 0.15s;
+    position: relative;
+    overflow: hidden;
+    margin-top: 4px;
+  }
+
+  .btn::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: rgba(255,255,255,0);
+    transition: background 0.2s;
+  }
+
+  .btn:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(124,92,252,0.35); }
+  .btn:active { transform: translateY(0); opacity: 0.9; }
+
+  /* Success */
+  .success-msg {
+    display: none;
+    align-items: center;
+    gap: 10px;
+    background: rgba(78,204,163,0.1);
+    border: 1px solid rgba(78,204,163,0.3);
+    border-radius: 10px;
+    padding: 12px 16px;
+    font-size: 14px;
+    color: var(--success);
+    animation: fadeUp 0.3s ease;
+  }
+
+  .success-msg.show { display: flex; }
+
+  /* Error */
+  .error-msg {
+    display: none;
+    align-items: center;
+    gap: 10px;
+    background: rgba(252,92,125,0.1);
+    border: 1px solid rgba(252,92,125,0.3);
+    border-radius: 10px;
+    padding: 12px 16px;
+    font-size: 14px;
+    color: var(--accent2);
+    animation: fadeUp 0.3s ease;
+  }
+
+  .error-msg.show { display: flex; }
+
+  /* Preview */
+  .preview {
+    display: none;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 14px;
+    font-size: 12px;
+    color: var(--muted);
+    font-family: monospace;
+    direction: ltr;
+    line-height: 1.8;
+    max-height: 120px;
+    overflow-y: auto;
+    white-space: pre;
+  }
+
+  .preview.show { display: block; animation: fadeUp 0.3s ease; }
+
+  .preview-label {
+    font-size: 12px;
+    color: var(--muted);
+    margin-bottom: 6px;
+    font-family: 'Cairo', sans-serif;
+    display: none;
+  }
+
+  .preview-label.show { display: block; }
+
+  /* Animations */
+  @keyframes fadeDown {
+    from { opacity: 0; transform: translateY(-20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(16px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  /* Scrollbar */
+  ::-webkit-scrollbar { width: 6px; }
+  ::-webkit-scrollbar-track { background: var(--surface2); border-radius: 3px; }
+  ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+</style>
+</head>
+<body>
+
+<div class="container">
+
+  <div class="header">
+    <div class="logo">
+      <div class="logo-icon">🎬</div>
+      <h1>M3U Generator</h1>
+    </div>
+    <p class="subtitle">حوّل روابط الحلقات إلى ملف playlist جاهز</p>
+  </div>
+
+  <div class="card">
+
+    <div class="field">
+      <label><span class="dot"></span> روابط الفيديو</label>
+      <textarea id="links" placeholder="ضع الروابط هنا، كل رابط في سطر...
+https://pixeldrain.com/api/file/xxxxx
+https://pixeldrain.com/api/file/xxxxx"></textarea>
+    </div>
+
+    <div class="row">
+      <div class="field">
+        <label><span class="dot"></span> ترقيم الحلقات من</label>
+        <input type="number" id="startNum" value="1" min="1" placeholder="1">
+      </div>
+      <div class="field">
+        <label><span class="dot"></span> اسم الأنمي / الملف</label>
+        <input type="text" id="filename" placeholder="مثال: Mob Psycho 100">
+      </div>
+    </div>
+
+    <div class="error-msg" id="errorMsg">⚠️ <span id="errorText"></span></div>
+
+    <button class="btn" onclick="generate()">⬇️ تحميل ملف M3U</button>
+
+    <div class="preview-label" id="previewLabel">معاينة الملف:</div>
+    <div class="preview" id="preview"></div>
+    <div class="success-msg" id="successMsg">✅ تم تحميل الملف بنجاح!</div>
+
+  </div>
+</div>
+
+<script>
+function generate() {
+  const linksRaw = document.getElementById('links').value.trim();
+  const startNum = parseInt(document.getElementById('startNum').value) || 1;
+  const filename = document.getElementById('filename').value.trim();
+
+  const errorMsg = document.getElementById('errorMsg');
+  const errorText = document.getElementById('errorText');
+  const successMsg = document.getElementById('successMsg');
+  const preview = document.getElementById('preview');
+  const previewLabel = document.getElementById('previewLabel');
+
+  // Reset
+  errorMsg.classList.remove('show');
+  successMsg.classList.remove('show');
+  preview.classList.remove('show');
+  previewLabel.classList.remove('show');
+
+  // Validate
+  if (!linksRaw) {
+    errorText.textContent = 'ضع الروابط أولاً!';
+    errorMsg.classList.add('show');
+    return;
+  }
+  if (!filename) {
+    errorText.textContent = 'اكتب اسم الأنمي أو الملف!';
+    errorMsg.classList.add('show');
+    return;
+  }
+
+  const links = linksRaw.split('\n').map(l => l.trim()).filter(l => l.length > 0);
+
+  if (links.length === 0) {
+    errorText.textContent = 'لم يتم العثور على روابط صحيحة!';
+    errorMsg.classList.add('show');
+    return;
+  }
+
+  // Build M3U
+  let m3u = '#EXTM3U\n';
+  links.forEach((link, i) => {
+    const ep = startNum + i;
+    m3u += `#EXTINF:-1,${filename} - الحلقة ${ep}\n${link}\n`;
+  });
+
+  // Preview
+  preview.textContent = m3u;
+  preview.classList.add('show');
+  previewLabel.classList.add('show');
+
+  // Download
+  const blob = new Blob([m3u], { type: 'audio/mpegurl' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `${filename}.m3u`;
+  a.click();
+  URL.revokeObjectURL(url);
+
+  successMsg.classList.add('show');
+}
+</script>
+
+</body>
+</html>
